@@ -1,28 +1,54 @@
 import { notFound } from "next/navigation";
-import { categories } from "@/data/categories";
-import { restaurants } from "@/data/restaurants";
-import { products } from "@/data/products";
+import type { Metadata } from "next";
+import { getCategories, getCategoryBySlug } from "@/lib/queries/categories";
+import { getAllRestaurants, getRestaurantsByCategory } from "@/lib/queries/restaurants";
+import { getProductsByRestaurantIds } from "@/lib/queries/menu-items";
 import { CategoryNav } from "@/components/marketplace/category-nav";
 import { RestaurantCard } from "@/components/restaurant/restaurant-card";
 import { CategoryProductGrid } from "@/components/marketplace/category-product-grid";
 
-export function generateStaticParams() {
-  return categories.map((c) => ({ slug: c.slug }));
+export const dynamic = "force-dynamic";
+
+interface PageProps {
+  params: { slug: string };
 }
 
-export default function CategoryPage({ params }: { params: { slug: string } }) {
-  const category = categories.find((c) => c.slug === params.slug);
+const ALL_CATEGORY = { id: "all", slug: "all", name: "All", icon: "LayoutGrid" };
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  if (params.slug === "all") {
+    return {
+      title: "All Restaurants Near You in Musanze, Rwanda | UMUCURUZI",
+      description: "Browse every restaurant and shop delivering on UMUCURUZI in Musanze, Rwanda.",
+      alternates: { canonical: "/categories/all" },
+    };
+  }
+
+  const category = await getCategoryBySlug(params.slug);
+  if (!category) return {};
+
+  return {
+    title: category.seoTitle || `Best ${category.name} in Musanze, Rwanda | UMUCURUZI`,
+    description:
+      category.seoDescription ||
+      `Order the best ${category.name.toLowerCase()} for delivery in Musanze, Rwanda on UMUCURUZI.`,
+    alternates: { canonical: `/categories/${category.slug}` },
+  };
+}
+
+export default async function CategoryPage({ params }: PageProps) {
+  const isAll = params.slug === "all";
+  const category = isAll ? ALL_CATEGORY : await getCategoryBySlug(params.slug);
   if (!category) notFound();
 
-  const isAll = category.slug === "all";
   const matchingRestaurants = isAll
-    ? restaurants
-    : restaurants.filter((r) => r.categories.includes(category.slug));
+    ? await getAllRestaurants()
+    : await getRestaurantsByCategory(category.slug);
 
-  const matchingRestaurantIds = new Set(matchingRestaurants.map((r) => r.id));
-  const matchingProducts = products.filter((p) =>
-    matchingRestaurantIds.has(p.restaurantId)
+  const matchingProducts = await getProductsByRestaurantIds(
+    matchingRestaurants.map((r) => r.id)
   );
+  const allCategories = await getCategories();
 
   return (
     <div className="pb-8">
@@ -36,7 +62,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
         </p>
       </div>
 
-      <CategoryNav activeSlug={category.slug} />
+      <CategoryNav categories={allCategories} activeSlug={category.slug} />
 
       <section className="px-5 sm:px-8 lg:px-10">
         <h2 className="mb-3 text-base font-bold text-brand-navy">Restaurants</h2>

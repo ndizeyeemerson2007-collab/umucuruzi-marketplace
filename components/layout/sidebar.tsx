@@ -24,7 +24,7 @@ const NAV_ITEMS = [
   { href: "/offers", label: "Offers", icon: Tag },
   { href: "/orders", label: "Orders", icon: ClipboardList },
   { href: "/favorites", label: "Favorites", icon: Heart },
-  { href: "/orders/ord-1003", label: "Track Order", icon: MapPinned },
+  { href: "/orders", label: "Track Order", icon: MapPinned },
   { href: "/profile", label: "Profile", icon: User },
 ];
 

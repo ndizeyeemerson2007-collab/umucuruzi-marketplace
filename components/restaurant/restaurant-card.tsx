@@ -13,7 +13,7 @@ export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
 
   return (
     <Link
-      href={`/restaurant/${restaurant.id}`}
+      href={`/restaurant/${restaurant.slug}`}
       className="group block shrink-0 overflow-hidden rounded-2xl bg-white shadow-card transition-shadow hover:shadow-panel"
     >
       <div className="relative h-36 w-full overflow-hidden">

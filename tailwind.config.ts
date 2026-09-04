@@ -6,6 +6,17 @@ const config: Config = {
     "./components/**/*.{ts,tsx}",
   ],
   theme: {
+    fontSize: {
+      xs: ["0.6875rem", { lineHeight: "1rem" }], // 11px
+      sm: ["0.75rem", { lineHeight: "1.15rem" }], // 12px
+      base: ["0.8125rem", { lineHeight: "1.3rem" }], // 13px
+      lg: ["0.875rem", { lineHeight: "1.35rem" }], // 14px
+      xl: ["1rem", { lineHeight: "1.5rem" }], // 16px
+      "2xl": ["1.125rem", { lineHeight: "1.6rem" }], // 18px
+      "3xl": ["1.375rem", { lineHeight: "1.75rem" }], // 22px
+      "4xl": ["1.75rem", { lineHeight: "2.1rem" }], // 28px
+      "5xl": ["2.125rem", { lineHeight: "2.4rem" }], // 34px
+    },
     extend: {
       colors: {
         brand: {
@@ -35,11 +46,14 @@ const config: Config = {
       },
       fontFamily: {
         sans: [
-          "Inter",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Roboto",
+          "Helvetica Neue",
           "ui-sans-serif",
           "system-ui",
-          "-apple-system",
-          "Segoe UI",
+          "Arial",
           "sans-serif",
         ],
       },

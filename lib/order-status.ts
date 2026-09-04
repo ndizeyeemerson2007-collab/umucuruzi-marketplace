@@ -37,4 +37,9 @@ export const ORDER_STATUS_LABELS: Record<
     description: "Your order has been delivered. Enjoy!",
     badgeClass: "bg-success-bg text-success",
   },
+  cancelled: {
+    label: "Cancelled",
+    description: "This order was cancelled.",
+    badgeClass: "bg-red-50 text-red-500",
+  },
 };

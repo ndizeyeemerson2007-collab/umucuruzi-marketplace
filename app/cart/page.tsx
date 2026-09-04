@@ -4,11 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, X, ArrowLeft } from "lucide-react";
 import { useCart } from "@/context/cart-context";
-import { getRestaurantById } from "@/data/restaurants";
 import { formatRwf } from "@/lib/format";
 
 export default function CartPage() {
-  const { lines, subtotal, deliveryFee, total, increment, decrement, removeItem, clearCart, itemCount } =
+  const { items, subtotal, deliveryFee, total, increment, decrement, removeItem, clearCart, itemCount } =
     useCart();
 
   return (
@@ -22,7 +21,7 @@ export default function CartPage() {
           <ArrowLeft size={20} className="text-brand-navy" />
         </Link>
         <h1 className="text-xl font-bold text-brand-navy">Your Cart ({itemCount})</h1>
-        {lines.length > 0 && (
+        {items.length > 0 && (
           <button
             type="button"
             onClick={clearCart}
@@ -33,7 +32,7 @@ export default function CartPage() {
         )}
       </div>
 
-      {lines.length === 0 ? (
+      {items.length === 0 ? (
         <div className="mt-10 flex flex-col items-center gap-3 rounded-2xl bg-white p-10 text-center shadow-card">
           <p className="text-base font-semibold text-brand-navy">Your cart is empty</p>
           <p className="text-sm text-slate-400">
@@ -49,58 +48,55 @@ export default function CartPage() {
       ) : (
         <>
           <div className="mt-6 space-y-3">
-            {lines.map(({ item, product }) => {
-              const restaurant = getRestaurantById(product.restaurantId);
-              return (
-                <div key={product.id} className="flex gap-3 rounded-2xl bg-white p-4 shadow-card">
-                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-surface-muted">
-                    <Image src={product.image} alt={product.name} fill sizes="64px" className="object-cover" />
+            {items.map((item) => (
+              <div key={item.productId} className="flex gap-3 rounded-2xl bg-white p-4 shadow-card">
+                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-surface-muted">
+                  <Image src={item.image} alt={item.name} fill sizes="64px" className="object-cover" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-brand-navy">{item.name}</p>
+                      <p className="truncate text-sm text-slate-400">{item.restaurantName}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeItem(item.productId)}
+                      className="shrink-0 text-slate-300 hover:text-red-500"
+                      aria-label={`Remove ${item.name}`}
+                    >
+                      <X size={18} />
+                    </button>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="truncate font-semibold text-brand-navy">{product.name}</p>
-                        <p className="truncate text-sm text-slate-400">{restaurant?.name}</p>
-                      </div>
+                  <div className="mt-2 flex items-center justify-between">
+                    <div className="flex items-center gap-3 rounded-full border border-surface-border px-2 py-1.5">
                       <button
                         type="button"
-                        onClick={() => removeItem(product.id)}
-                        className="shrink-0 text-slate-300 hover:text-red-500"
-                        aria-label={`Remove ${product.name}`}
+                        onClick={() => decrement(item.productId)}
+                        className="flex h-6 w-6 items-center justify-center rounded-full text-brand-navy hover:bg-surface-muted"
+                        aria-label="Decrease quantity"
                       >
-                        <X size={18} />
+                        <Minus size={14} />
+                      </button>
+                      <span className="w-4 text-center text-sm font-semibold text-brand-navy">
+                        {item.quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => increment(item.productId)}
+                        className="flex h-6 w-6 items-center justify-center rounded-full text-brand-navy hover:bg-surface-muted"
+                        aria-label="Increase quantity"
+                      >
+                        <Plus size={14} />
                       </button>
                     </div>
-                    <div className="mt-2 flex items-center justify-between">
-                      <div className="flex items-center gap-3 rounded-full border border-surface-border px-2 py-1.5">
-                        <button
-                          type="button"
-                          onClick={() => decrement(product.id)}
-                          className="flex h-6 w-6 items-center justify-center rounded-full text-brand-navy hover:bg-surface-muted"
-                          aria-label="Decrease quantity"
-                        >
-                          <Minus size={14} />
-                        </button>
-                        <span className="w-4 text-center text-sm font-semibold text-brand-navy">
-                          {item.quantity}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => increment(product.id)}
-                          className="flex h-6 w-6 items-center justify-center rounded-full text-brand-navy hover:bg-surface-muted"
-                          aria-label="Increase quantity"
-                        >
-                          <Plus size={14} />
-                        </button>
-                      </div>
-                      <span className="font-semibold text-brand-navy">
-                        {formatRwf(product.price * item.quantity)}
-                      </span>
-                    </div>
+                    <span className="font-semibold text-brand-navy">
+                      {formatRwf(item.price * item.quantity)}
+                    </span>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
 
           <div className="mt-6 rounded-2xl bg-white p-5 shadow-card">

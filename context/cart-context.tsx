@@ -9,21 +9,16 @@ import {
   ReactNode,
 } from "react";
 import { CartItem, Product } from "@/types/marketplace";
-import { getProductById } from "@/data/products";
-import { getRestaurantById } from "@/data/restaurants";
 
 const CART_STORAGE_KEY = "umucuruzi:cart";
 
-export interface CartLine {
-  item: CartItem;
-  product: Product;
-}
-
 interface CartContextValue {
   items: CartItem[];
-  lines: CartLine[];
   restaurantId: string | null;
-  addItem: (product: Product, quantity?: number) => void;
+  addItem: (
+    product: Product & { restaurantName: string; restaurantDeliveryFee: number },
+    quantity?: number
+  ) => void;
   removeItem: (productId: string) => void;
   increment: (productId: string) => void;
   decrement: (productId: string) => void;
@@ -64,7 +59,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, hydrated]);
 
-  const addItem = (product: Product, quantity = 1) => {
+  const addItem: CartContextValue["addItem"] = (product, quantity = 1) => {
     if (!product.available) return;
     setItems((prev) => {
       const existing = prev.find((i) => i.productId === product.id);
@@ -75,7 +70,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
             : i
         );
       }
-      return [...prev, { productId: product.id, quantity }];
+      const newItem: CartItem = {
+        productId: product.id,
+        name: product.name,
+        image: product.image,
+        price: product.price,
+        restaurantId: product.restaurantId,
+        restaurantName: product.restaurantName,
+        deliveryFee: product.restaurantDeliveryFee,
+        quantity,
+      };
+      return [...prev, newItem];
     });
   };
 
@@ -103,29 +108,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = () => setItems([]);
 
-  const lines: CartLine[] = useMemo(
-    () =>
-      items
-        .map((item) => {
-          const product = getProductById(item.productId);
-          return product ? { item, product } : null;
-        })
-        .filter((l): l is CartLine => l !== null),
+  const restaurantId = items.length > 0 ? items[0].restaurantId : null;
+
+  const subtotal = useMemo(
+    () => items.reduce((sum, i) => sum + i.price * i.quantity, 0),
     [items]
   );
 
-  const restaurantId = lines.length > 0 ? lines[0].product.restaurantId : null;
-
-  const subtotal = useMemo(
-    () => lines.reduce((sum, l) => sum + l.product.price * l.item.quantity, 0),
-    [lines]
-  );
-
-  const deliveryFee = useMemo(() => {
-    if (!restaurantId) return 0;
-    const restaurant = getRestaurantById(restaurantId);
-    return restaurant?.deliveryFee ?? 0;
-  }, [restaurantId]);
+  const deliveryFee = items.length > 0 ? items[0].deliveryFee : 0;
 
   const total = subtotal + deliveryFee;
 
@@ -138,7 +128,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     <CartContext.Provider
       value={{
         items,
-        lines,
         restaurantId,
         addItem,
         removeItem,

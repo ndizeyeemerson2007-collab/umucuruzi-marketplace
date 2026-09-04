@@ -1,11 +1,9 @@
 // ---------------------------------------------------------------------------
-// Shared marketplace types.
-//
-// These types describe the shape of data the marketplace consumes. Right now
-// every value implementing these interfaces comes from local mock data in
-// /data. When the POS/shared database is ready, the same interfaces should be
-// satisfied by data fetched from Supabase/API routes — the UI layer should
-// not need to change.
+// Shared marketplace types — this is the contract between the Supabase
+// schema (see /lib/supabase and the migrations run against the
+// `umucuruziltd` project) and the UI. Query functions in /lib/queries map
+// raw DB rows onto these interfaces, so components never see snake_case
+// column names directly.
 // ---------------------------------------------------------------------------
 
 export interface Category {
@@ -13,10 +11,13 @@ export interface Category {
   slug: string;
   name: string;
   icon: string; // lucide-react icon name, resolved in a small lookup map
+  seoTitle?: string | null;
+  seoDescription?: string | null;
 }
 
 export interface Restaurant {
   id: string;
+  slug: string;
   name: string;
   description: string;
   image: string;
@@ -31,9 +32,18 @@ export interface Restaurant {
   isOpen: boolean;
   isFeatured: boolean;
   verified: boolean;
-  location: string;
-  // Below fields will eventually be owned/updated by the POS.
-  minOrder?: number;
+  location: string; // display string, e.g. "Musanze, Rwanda"
+  addressLine?: string | null;
+  city: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  minOrder?: number | null;
+  phone?: string | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  seoKeywords?: string[];
+  // Present once a restaurant is subscribed via the POS API sync.
+  posRestaurantId?: string | null;
 }
 
 export interface Product {
@@ -48,20 +58,36 @@ export interface Product {
   isFeatured: boolean;
   available: boolean; // controlled by POS stock in the future
   rating: number;
+  // Denormalized convenience fields, populated by queries that join the
+  // parent restaurant in (home best sellers, favorites, cart) so the UI
+  // never needs a second lookup by id.
+  restaurantName?: string;
+  restaurantDeliveryFee?: number;
 }
 
 export interface Offer {
   id: string;
   title: string;
   subtitle: string;
-  code?: string;
+  code?: string | null;
   color: "blue" | "green" | "yellow" | "navy";
   icon: string;
-  restaurantId?: string;
+  restaurantId?: string | null;
 }
 
+// Cart items snapshot the product's display fields at the moment they're
+// added, rather than storing just a productId + quantity. That way the
+// cart (and its totals) never needs a synchronous client-side lookup back
+// into the catalog, and a later menu price change on the POS never quietly
+// rewrites an item already sitting in someone's cart.
 export interface CartItem {
   productId: string;
+  name: string;
+  image: string;
+  price: number;
+  restaurantId: string;
+  restaurantName: string;
+  deliveryFee: number;
   quantity: number;
   specialInstructions?: string;
 }
@@ -71,10 +97,11 @@ export type OrderStatus =
   | "preparing"
   | "driver_assigned"
   | "on_the_way"
-  | "delivered";
+  | "delivered"
+  | "cancelled";
 
 export interface OrderItem {
-  productId: string;
+  productId: string | null;
   name: string;
   quantity: number;
   price: number;
@@ -82,7 +109,9 @@ export interface OrderItem {
 
 export interface Order {
   id: string;
+  orderNumber: string;
   restaurantId: string;
+  restaurantName?: string;
   items: OrderItem[];
   status: OrderStatus;
   placedAt: string; // ISO date
@@ -90,7 +119,7 @@ export interface Order {
   deliveryFee: number;
   total: number;
   deliveryAddress: string;
-  paymentMethod: PaymentMethod;
+  paymentMethod: PaymentMethod | null;
 }
 
 export type PaymentMethod = "mtn_momo" | "airtel_money" | "cash_on_delivery";

@@ -1,7 +1,19 @@
-import { offers } from "@/data/offers";
+import type { Metadata } from "next";
+import { getActiveOffers } from "@/lib/queries/offers";
 import { OfferCard } from "@/components/marketplace/offers-section";
 
-export default function OffersPage() {
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Today's Offers & Discounts | UMUCURUZI",
+  description:
+    "See today's delivery discounts and restaurant offers in Musanze, Rwanda on UMUCURUZI.",
+  alternates: { canonical: "/offers" },
+};
+
+export default async function OffersPage() {
+  const offers = await getActiveOffers();
+
   return (
     <div className="px-5 py-6 sm:px-8 lg:px-10">
       <h1 className="text-xl font-bold text-brand-navy sm:text-2xl">Offers</h1>

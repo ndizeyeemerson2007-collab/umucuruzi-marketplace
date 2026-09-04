@@ -5,7 +5,6 @@ import { useState } from "react";
 import { Minus, Plus, X } from "lucide-react";
 import { Product } from "@/types/marketplace";
 import { useCart } from "@/context/cart-context";
-import { getRestaurantById } from "@/data/restaurants";
 import { formatRwf } from "@/lib/format";
 
 export function ProductModal({
@@ -19,10 +18,16 @@ export function ProductModal({
   const [quantity, setQuantity] = useState(1);
   const [notes, setNotes] = useState("");
   const [added, setAdded] = useState(false);
-  const restaurant = getRestaurantById(product.restaurantId);
 
   const handleAdd = () => {
-    addItem(product, quantity);
+    addItem(
+      {
+        ...product,
+        restaurantName: product.restaurantName ?? "",
+        restaurantDeliveryFee: product.restaurantDeliveryFee ?? 0,
+      },
+      quantity
+    );
     setAdded(true);
     setTimeout(() => onClose(), 500);
   };
@@ -54,8 +59,8 @@ export function ProductModal({
               {formatRwf(product.price)}
             </span>
           </div>
-          {restaurant && (
-            <p className="mt-0.5 text-sm text-slate-400">{restaurant.name}</p>
+          {product.restaurantName && (
+            <p className="mt-0.5 text-sm text-slate-400">{product.restaurantName}</p>
           )}
           <p className="mt-3 text-sm leading-relaxed text-slate-500">
             {product.description}

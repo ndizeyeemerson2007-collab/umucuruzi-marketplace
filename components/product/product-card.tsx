@@ -73,7 +73,13 @@ export function ProductCard({
           <button
             type="button"
             disabled={!product.available}
-            onClick={() => addItem(product)}
+            onClick={() =>
+              addItem({
+                ...product,
+                restaurantName: product.restaurantName ?? "",
+                restaurantDeliveryFee: product.restaurantDeliveryFee ?? 0,
+              })
+            }
             className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-500 text-white transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
             aria-label={`Add ${product.name} to cart`}
           >

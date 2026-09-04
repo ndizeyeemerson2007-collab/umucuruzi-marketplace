@@ -6,7 +6,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, MapPin, Phone, Smartphone, Banknote, Wallet } from "lucide-react";
 import { useCart } from "@/context/cart-context";
-import { getRestaurantById } from "@/data/restaurants";
 import { formatRwf } from "@/lib/format";
 import { PaymentMethod } from "@/types/marketplace";
 
@@ -18,25 +17,54 @@ const PAYMENT_OPTIONS: { id: PaymentMethod; label: string; icon: typeof Smartpho
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { lines, subtotal, deliveryFee, total, clearCart } = useCart();
+  const { items, subtotal, deliveryFee, total, restaurantId, clearCart } = useCart();
   const [location, setLocation] = useState("Musanze, Rwanda");
   const [phone, setPhone] = useState("");
   const [notes, setNotes] = useState("");
   const [payment, setPayment] = useState<PaymentMethod>("mtn_momo");
   const [placing, setPlacing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handlePlaceOrder = () => {
-    if (lines.length === 0) return;
+  const handlePlaceOrder = async () => {
+    if (items.length === 0 || !restaurantId) return;
     setPlacing(true);
-    // No backend yet — simulate order placement, then clear cart and
-    // route to an existing mock order so tracking can be demonstrated.
-    setTimeout(() => {
+    setErrorMessage(null);
+
+    try {
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          restaurantId,
+          items: items.map((item) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+            specialInstructions: item.specialInstructions,
+          })),
+          deliveryAddress: location,
+          customerPhone: phone || undefined,
+          paymentMethod: payment,
+          notes: notes || undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error ?? "Could not place order.");
+      }
+
       clearCart();
-      router.push("/orders/ord-1005");
-    }, 600);
+      router.push(`/orders/${data.orderNumber}`);
+    } catch (err) {
+      setErrorMessage(
+        err instanceof Error ? err.message : "Something went wrong placing your order."
+      );
+      setPlacing(false);
+    }
   };
 
-  if (lines.length === 0) {
+  if (items.length === 0) {
     return (
       <div className="mx-auto max-w-2xl px-5 py-10 text-center sm:px-8">
         <p className="text-base font-semibold text-brand-navy">Your cart is empty</p>
@@ -68,25 +96,22 @@ export default function CheckoutPage() {
       <div className="mt-6 rounded-2xl bg-white p-5 shadow-card">
         <h2 className="text-sm font-bold text-brand-navy">Order summary</h2>
         <div className="mt-3 space-y-3">
-          {lines.map(({ item, product }) => {
-            const restaurant = getRestaurantById(product.restaurantId);
-            return (
-              <div key={product.id} className="flex items-center gap-3">
-                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-surface-muted">
-                  <Image src={product.image} alt={product.name} fill sizes="48px" className="object-cover" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-brand-navy">
-                    {item.quantity}x {product.name}
-                  </p>
-                  <p className="truncate text-xs text-slate-400">{restaurant?.name}</p>
-                </div>
-                <span className="shrink-0 text-sm font-semibold text-brand-navy">
-                  {formatRwf(product.price * item.quantity)}
-                </span>
+          {items.map((item) => (
+            <div key={item.productId} className="flex items-center gap-3">
+              <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-surface-muted">
+                <Image src={item.image} alt={item.name} fill sizes="48px" className="object-cover" />
               </div>
-            );
-          })}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-brand-navy">
+                  {item.quantity}x {item.name}
+                </p>
+                <p className="truncate text-xs text-slate-400">{item.restaurantName}</p>
+              </div>
+              <span className="shrink-0 text-sm font-semibold text-brand-navy">
+                {formatRwf(item.price * item.quantity)}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -181,6 +206,13 @@ export default function CheckoutPage() {
           <span className="text-base font-bold text-brand-navy">Total</span>
           <span className="text-base font-bold text-brand-navy">{formatRwf(total)}</span>
         </div>
+
+        {errorMessage && (
+          <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-500">
+            {errorMessage}
+          </p>
+        )}
+
         <button
           type="button"
           onClick={handlePlaceOrder}
