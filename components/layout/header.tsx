@@ -26,8 +26,15 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
 
         {/* Logo */}
         <Link href="/" className="flex shrink-0 items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500 text-white shadow-card">
-            <ShoppingCart size={18} strokeWidth={2.5} />
+          <span className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-brand-50 shadow-card">
+            <Image
+              src="/umucuruzi-mark.png"
+              alt="UMUCURUZI"
+              fill
+              sizes="36px"
+              className="object-contain p-0.5"
+              priority
+            />
           </span>
           <span className="hidden text-xl font-bold tracking-tight text-brand-navy sm:inline">
             UMUCURUZI
