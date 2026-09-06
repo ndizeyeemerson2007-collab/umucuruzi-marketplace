@@ -17,6 +17,8 @@ const MENU_ITEM_SELECT = "*, restaurants!inner(name, delivery_fee, status)";
 
 export async function getProductsByRestaurantId(restaurantId: string): Promise<Product[]> {
   const supabase = createServerSupabaseClient();
+  if (!supabase) return [];
+
   const { data, error } = await supabase
     .from("menu_items")
     .select(MENU_ITEM_SELECT)
@@ -37,6 +39,8 @@ export async function getProductsByRestaurantId(restaurantId: string): Promise<P
 
 export async function getBestSellers(limit = 5): Promise<Product[]> {
   const supabase = createServerSupabaseClient();
+  if (!supabase) return [];
+
   const { data, error } = await supabase
     .from("menu_items")
     .select(MENU_ITEM_SELECT)
@@ -59,6 +63,8 @@ export async function getBestSellers(limit = 5): Promise<Product[]> {
 export async function getProductsByIds(ids: string[]): Promise<Product[]> {
   if (ids.length === 0) return [];
   const supabase = createServerSupabaseClient();
+  if (!supabase) return [];
+
   const { data, error } = await supabase
     .from("menu_items")
     .select(MENU_ITEM_SELECT)
@@ -79,6 +85,8 @@ export async function getProductsByIds(ids: string[]): Promise<Product[]> {
 export async function getProductsByRestaurantIds(restaurantIds: string[]): Promise<Product[]> {
   if (restaurantIds.length === 0) return [];
   const supabase = createServerSupabaseClient();
+  if (!supabase) return [];
+
   const { data, error } = await supabase
     .from("menu_items")
     .select(MENU_ITEM_SELECT)

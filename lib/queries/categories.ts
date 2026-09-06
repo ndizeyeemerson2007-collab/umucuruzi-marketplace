@@ -5,6 +5,8 @@ import type { Category } from "@/types/marketplace";
 
 export async function getCategories(): Promise<Category[]> {
   const supabase = createServerSupabaseClient();
+  if (!supabase) return [];
+
   const { data, error } = await supabase
     .from("categories")
     .select("*")
@@ -20,6 +22,8 @@ export async function getCategories(): Promise<Category[]> {
 
 export async function getCategoryBySlug(slug: string): Promise<Category | null> {
   const supabase = createServerSupabaseClient();
+  if (!supabase) return null;
+
   const { data, error } = await supabase
     .from("categories")
     .select("*")

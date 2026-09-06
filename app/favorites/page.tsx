@@ -23,6 +23,15 @@ export default function FavoritesPage() {
       setLoading(true);
       const supabase = getBrowserSupabaseClient();
 
+      if (!supabase) {
+        if (!cancelled) {
+          setRestaurants([]);
+          setProducts([]);
+          setLoading(false);
+        }
+        return;
+      }
+
       const [restaurantsResult, productsResult] = await Promise.all([
         favoriteRestaurantIds.length > 0
           ? supabase

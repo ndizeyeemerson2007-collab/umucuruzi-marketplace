@@ -5,6 +5,8 @@ import type { Offer } from "@/types/marketplace";
 
 export async function getActiveOffers(limit?: number): Promise<Offer[]> {
   const supabase = createServerSupabaseClient();
+  if (!supabase) return [];
+
   let query = supabase
     .from("offers")
     .select("*")

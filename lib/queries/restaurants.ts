@@ -19,6 +19,8 @@ const RESTAURANT_SELECT = "*, restaurant_categories(categories(slug))";
 
 export async function getAllRestaurants(): Promise<Restaurant[]> {
   const supabase = createServerSupabaseClient();
+  if (!supabase) return [];
+
   const { data, error } = await supabase
     .from("restaurants")
     .select(RESTAURANT_SELECT)
@@ -39,6 +41,8 @@ export async function getAllRestaurants(): Promise<Restaurant[]> {
 
 export async function getFeaturedRestaurants(limit = 4): Promise<Restaurant[]> {
   const supabase = createServerSupabaseClient();
+  if (!supabase) return [];
+
   const { data, error } = await supabase
     .from("restaurants")
     .select(RESTAURANT_SELECT)
@@ -62,6 +66,8 @@ export async function getRestaurantsByCategory(categorySlug: string): Promise<Re
   if (categorySlug === "all") return getAllRestaurants();
 
   const supabase = createServerSupabaseClient();
+  if (!supabase) return [];
+
   const { data, error } = await supabase
     .from("restaurants")
     .select(
@@ -84,6 +90,8 @@ export async function getRestaurantsByCategory(categorySlug: string): Promise<Re
 
 export async function getRestaurantBySlug(slug: string): Promise<Restaurant | null> {
   const supabase = createServerSupabaseClient();
+  if (!supabase) return null;
+
   const { data, error } = await supabase
     .from("restaurants")
     .select(RESTAURANT_SELECT)
@@ -100,6 +108,8 @@ export async function getRestaurantBySlug(slug: string): Promise<Restaurant | nu
 export async function getRestaurantsByIds(ids: string[]): Promise<Restaurant[]> {
   if (ids.length === 0) return [];
   const supabase = createServerSupabaseClient();
+  if (!supabase) return [];
+
   const { data, error } = await supabase
     .from("restaurants")
     .select(RESTAURANT_SELECT)
