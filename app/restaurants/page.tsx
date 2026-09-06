@@ -12,7 +12,11 @@ export const metadata: Metadata = {
   alternates: { canonical: "/restaurants" },
 };
 
-export default async function RestaurantsPage() {
+export default async function RestaurantsPage({
+  searchParams,
+}: {
+  searchParams?: { q?: string | string[] };
+}) {
   const [restaurants, categories] = await Promise.all([
     getAllRestaurants(),
     getCategories(),
@@ -25,7 +29,11 @@ export default async function RestaurantsPage() {
         {restaurants.length} place{restaurants.length !== 1 ? "s" : ""} near Musanze, Rwanda
       </p>
 
-      <RestaurantsBrowser restaurants={restaurants} categories={categories} />
+      <RestaurantsBrowser
+        restaurants={restaurants}
+        categories={categories}
+        initialQuery={typeof searchParams?.q === "string" ? searchParams.q : ""}
+      />
     </div>
   );
 }

@@ -64,19 +64,21 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         </button>
 
         {/* Search bar */}
-        <div className="relative hidden flex-1 max-w-xl md:block">
+        <form action="/restaurants" method="get" className="relative hidden flex-1 max-w-xl md:block">
           <Search
             size={18}
             className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
           />
           <input
-            type="text"
+            type="search"
+            name="q"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search restaurants, food, drinks..."
+            placeholder="Search restaurants, cuisines, or dishes..."
+            aria-label="Search restaurants, cuisines, or dishes"
             className="w-full rounded-full border border-surface-border bg-surface-muted py-2.5 pl-11 pr-4 text-sm text-brand-navy placeholder:text-slate-400 focus:border-brand-400 focus:bg-white focus:outline-none"
           />
-        </div>
+        </form>
 
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
           <Link
@@ -158,19 +160,21 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
           <span>{status === "loading" ? "Locating..." : location.label}</span>
           <ChevronDown size={12} className="text-slate-400" />
         </button>
-        <div className="relative">
+        <form action="/restaurants" method="get" className="relative">
           <Search
             size={18}
             className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
           />
           <input
-            type="text"
+            type="search"
+            name="q"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search restaurants, food, drinks..."
+            placeholder="Search restaurants, cuisines, or dishes..."
+            aria-label="Search restaurants, cuisines, or dishes"
             className="w-full rounded-full border border-surface-border bg-surface-muted py-2.5 pl-11 pr-4 text-sm text-brand-navy placeholder:text-slate-400 focus:border-brand-400 focus:bg-white focus:outline-none"
           />
-        </div>
+        </form>
       </div>
     </header>
   );

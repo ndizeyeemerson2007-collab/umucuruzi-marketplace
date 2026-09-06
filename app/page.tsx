@@ -30,8 +30,8 @@ export default async function HomePage() {
     <div className="space-y-6 pb-8">
       <Hero />
       <CategoryNav categories={categories} activeSlug="all" />
-      <FeaturedRestaurants restaurants={featuredRestaurants} />
       <BestSellers products={bestSellers} />
+      <FeaturedRestaurants restaurants={featuredRestaurants} />
       <OffersSection offers={topOffers} />
     </div>
   );
