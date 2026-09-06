@@ -7,6 +7,7 @@ import {
   useState,
   ReactNode,
   useCallback,
+  useRef,
 } from "react";
 import { DEFAULT_LOCATION, UserLocation } from "@/lib/geo";
 
@@ -29,6 +30,30 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     source: "default",
   });
   const [status, setStatus] = useState<LocationStatus>("idle");
+  const watchIdRef = useRef<number | null>(null);
+
+  const stopWatching = useCallback(() => {
+    if (watchIdRef.current !== null && typeof navigator !== "undefined" && navigator.geolocation) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+  }, []);
+
+  const applyPosition = useCallback((position: GeolocationPosition) => {
+    const next: UserLocation = {
+      latitude: position.coords.latitude,
+      longitude: position.coords.longitude,
+      label: "Your current location",
+      source: "gps",
+    };
+    setLocation(next);
+    setStatus("granted");
+    try {
+      window.localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      // ignore write errors
+    }
+  }, []);
 
   const requestLocation = useCallback(() => {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
@@ -37,50 +62,55 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     }
 
     setStatus("loading");
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const next: UserLocation = {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          label: "Your current location",
-          source: "gps",
-        };
-        setLocation(next);
-        setStatus("granted");
-        try {
-          window.localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(next));
-        } catch {
-          // ignore write errors
-        }
-      },
+    stopWatching();
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      applyPosition,
       () => {
-        // Permission denied, timed out, or unavailable — quietly keep the
-        // default reference point rather than interrupting the browsing flow.
+        // Permission denied, timed out, or unavailable — keep the last usable
+        // location rather than interrupting the browsing flow.
         setStatus("denied");
       },
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 10 * 60 * 1000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
-  }, []);
+  }, [applyPosition, stopWatching]);
 
   // On first load: use a previously saved location if we have one, otherwise
   // try a silent geolocation request automatically.
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(LOCATION_STORAGE_KEY);
+      let hasSavedLocation = false;
       if (raw) {
         const saved = JSON.parse(raw) as UserLocation;
         if (typeof saved.latitude === "number" && typeof saved.longitude === "number") {
           setLocation(saved);
           setStatus("granted");
-          return;
+          hasSavedLocation = true;
         }
+      }
+      if (!hasSavedLocation) {
+        requestLocation();
+        return;
+      }
+
+      // Refresh cached coordinates automatically only when permission was
+      // already granted. Otherwise the user can explicitly tap the location
+      // control to trigger the browser permission prompt.
+      if (navigator.permissions) {
+        navigator.permissions
+          .query({ name: "geolocation" })
+          .then((permission) => {
+            if (permission.state === "granted") requestLocation();
+          })
+          .catch(() => undefined);
       }
     } catch {
       // ignore malformed storage and fall through to a fresh request
+      requestLocation();
     }
-    requestLocation();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [requestLocation]);
+
+  useEffect(() => stopWatching, [stopWatching]);
 
   return (
     <LocationContext.Provider value={{ location, status, requestLocation }}>
