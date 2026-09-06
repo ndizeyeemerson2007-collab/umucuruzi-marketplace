@@ -12,10 +12,10 @@ export function CategoryNav({
   activeSlug?: string;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-2 px-5 py-4 sm:flex sm:gap-3 sm:overflow-x-auto sm:px-8 sm:py-5 lg:px-10">
+    <div className="no-scrollbar flex gap-3 overflow-x-auto px-5 py-5 sm:px-8 lg:px-10">
       <Link
         href="/categories/all"
-        className={`flex w-full flex-col items-center gap-1.5 rounded-xl border px-2 py-2.5 text-center transition-colors sm:w-[76px] sm:shrink-0 sm:gap-2 sm:rounded-2xl sm:py-3 ${
+        className={`flex w-[76px] shrink-0 flex-col items-center gap-2 rounded-2xl border px-2 py-3 text-center transition-colors ${
           activeSlug === "all"
             ? "border-brand-200 bg-brand-50"
             : "border-surface-border bg-white hover:border-brand-200"
@@ -47,7 +47,7 @@ export function CategoryNav({
           <Link
             key={category.id}
             href={`/categories/${category.slug}`}
-            className={`flex w-full flex-col items-center gap-1.5 rounded-xl border px-2 py-2.5 text-center transition-colors sm:w-[76px] sm:shrink-0 sm:gap-2 sm:rounded-2xl sm:py-3 ${
+            className={`flex w-[76px] shrink-0 flex-col items-center gap-2 rounded-2xl border px-2 py-3 text-center transition-colors ${
               isActive
                 ? "border-brand-200 bg-brand-50"
                 : "border-surface-border bg-white hover:border-brand-200"
