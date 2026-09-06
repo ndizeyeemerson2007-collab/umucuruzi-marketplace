@@ -22,9 +22,9 @@ export function BestSellers({ products }: { products: Product[] }) {
         </Link>
       </div>
 
-      <div className="no-scrollbar -mx-1 flex gap-4 overflow-x-auto px-1 pb-2 sm:grid sm:grid-cols-3 sm:overflow-visible lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 px-1 pb-2 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
         {products.map((product) => (
-          <div key={product.id} className="w-[170px] sm:w-auto">
+          <div key={product.id} className="min-w-0">
             <ProductCard product={product} onOpen={setActiveProduct} />
           </div>
         ))}

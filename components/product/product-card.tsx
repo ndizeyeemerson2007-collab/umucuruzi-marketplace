@@ -19,11 +19,11 @@ export function ProductCard({
   const favorite = isFavoriteProduct(product.id);
 
   return (
-    <div className="group shrink-0 overflow-hidden rounded-2xl bg-white shadow-card transition-shadow hover:shadow-panel">
+    <div className="group shrink-0 overflow-hidden rounded-xl bg-white shadow-card transition-shadow hover:shadow-panel">
       <button
         type="button"
         onClick={() => onOpen?.(product)}
-        className="relative block h-32 w-full overflow-hidden text-left"
+        className="relative block h-24 w-full overflow-hidden text-left sm:h-28"
       >
         <Image
           src={product.image}
@@ -53,21 +53,21 @@ export function ProductCard({
             e.stopPropagation();
             toggleFavoriteProduct(product.id);
           }}
-          className="absolute right-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-brand-navy shadow-card hover:text-red-500"
+          className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/95 text-brand-navy shadow-card hover:text-red-500 sm:right-2.5 sm:top-2.5 sm:h-7 sm:w-7"
           aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
         >
           <Heart size={13} className={favorite ? "fill-red-500 text-red-500" : ""} />
         </span>
       </button>
 
-      <div className="p-3.5">
+      <div className="p-2.5 sm:p-3">
         <button type="button" onClick={() => onOpen?.(product)} className="block w-full text-left">
-          <h3 className="truncate text-sm font-semibold text-brand-navy">
+          <h3 className="truncate text-xs font-semibold text-brand-navy sm:text-sm">
             {product.name}
           </h3>
         </button>
-        <div className="mt-1.5 flex items-center justify-between">
-          <span className="text-sm font-bold text-brand-navy">
+        <div className="mt-1 flex items-center justify-between sm:mt-1.5">
+          <span className="text-xs font-bold text-brand-navy sm:text-sm">
             {formatRwf(product.price)}
           </span>
           <button
@@ -80,7 +80,7 @@ export function ProductCard({
                 restaurantDeliveryFee: product.restaurantDeliveryFee ?? 0,
               })
             }
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-500 text-white transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-500 text-white transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 sm:h-8 sm:w-8"
             aria-label={`Add ${product.name} to cart`}
           >
             <Plus size={16} />

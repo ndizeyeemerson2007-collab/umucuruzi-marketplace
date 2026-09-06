@@ -14,9 +14,9 @@ export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
   return (
     <Link
       href={`/restaurant/${restaurant.slug}`}
-      className="group block shrink-0 overflow-hidden rounded-2xl bg-white shadow-card transition-shadow hover:shadow-panel"
+      className="group block shrink-0 overflow-hidden rounded-xl bg-white shadow-card transition-shadow hover:shadow-panel"
     >
-      <div className="relative h-36 w-full overflow-hidden">
+      <div className="relative h-24 w-full overflow-hidden sm:h-28">
         <Image
           src={restaurant.image}
           alt={restaurant.name}
@@ -35,16 +35,16 @@ export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
             e.preventDefault();
             toggleFavoriteRestaurant(restaurant.id);
           }}
-          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-brand-navy shadow-card hover:text-red-500"
+          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-brand-navy shadow-card hover:text-red-500 sm:right-3 sm:top-3 sm:h-8 sm:w-8"
           aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
         >
           <Heart size={15} className={favorite ? "fill-red-500 text-red-500" : ""} />
         </button>
       </div>
 
-      <div className="p-4">
+      <div className="p-2.5 sm:p-3">
         <div className="flex items-center gap-1.5">
-          <h3 className="truncate text-[15px] font-bold text-brand-navy">
+          <h3 className="truncate text-sm font-bold text-brand-navy sm:text-[15px]">
             {restaurant.name}
           </h3>
           {restaurant.verified && (
@@ -52,7 +52,7 @@ export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
           )}
         </div>
 
-        <div className="mt-1.5 flex items-center gap-1.5 text-sm text-slate-500">
+        <div className="mt-1 flex items-center gap-1 text-xs text-slate-500 sm:mt-1.5 sm:gap-1.5 sm:text-sm">
           <Star size={13} className="fill-amber-400 text-amber-400" />
           <span className="font-semibold text-brand-navy">{restaurant.rating}</span>
           <span>({restaurant.reviewCount})</span>
@@ -60,13 +60,13 @@ export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
           <span>{restaurant.distanceKm} km</span>
         </div>
 
-        <p className="mt-1 truncate text-sm text-slate-400">
+        <p className="mt-1 truncate text-xs text-slate-400 sm:text-sm">
           {restaurant.categories
             .map((c) => c.replace("-", " "))
             .join(" \u00b7 ")}
         </p>
 
-        <div className="mt-2 flex items-center justify-between text-sm">
+        <div className="mt-1.5 flex items-center justify-between text-xs sm:mt-2 sm:text-sm">
           <span className="text-slate-500">
             {formatDeliveryRange(restaurant.deliveryTimeMin, restaurant.deliveryTimeMax)}
             {" \u00b7 "}
@@ -75,7 +75,7 @@ export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
         </div>
 
         <p
-          className={`mt-1.5 text-sm font-semibold ${
+          className={`mt-1 text-xs font-semibold sm:mt-1.5 sm:text-sm ${
             restaurant.isOpen ? "text-success" : "text-red-500"
           }`}
         >

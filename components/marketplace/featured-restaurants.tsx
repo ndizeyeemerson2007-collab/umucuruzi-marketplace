@@ -19,9 +19,9 @@ export function FeaturedRestaurants({ restaurants }: { restaurants: Restaurant[]
           No featured restaurants match your filters right now.
         </p>
       ) : (
-        <div className="no-scrollbar -mx-1 flex gap-4 overflow-x-auto px-1 pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 px-1 pb-2 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
           {restaurants.map((restaurant) => (
-            <div key={restaurant.id} className="w-[260px] sm:w-auto">
+            <div key={restaurant.id} className="min-w-0">
               <RestaurantCard restaurant={restaurant} />
             </div>
           ))}
