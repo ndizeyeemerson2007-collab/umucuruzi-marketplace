@@ -1,7 +1,12 @@
+"use client";
+
 import Image from "next/image";
 import { MapPin } from "lucide-react";
+import { useLocation } from "@/context/location-context";
 
 export function Hero() {
+  const { location, requestLocation } = useLocation();
+
   return (
     <section className="relative overflow-hidden bg-white px-5 py-8 sm:px-8 lg:px-10">
       <div className="grid items-center gap-8 lg:grid-cols-[1fr_auto]">
@@ -16,10 +21,11 @@ export function Hero() {
           </p>
           <button
             type="button"
+            onClick={requestLocation}
             className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand-50 px-4 py-2 text-sm font-medium text-brand-600"
           >
             <MapPin size={15} className="text-success" />
-            Delivering to: <span className="font-semibold">Musanze, Rwanda</span>
+            Delivering to: <span className="font-semibold">{location.label}</span>
           </button>
         </div>
 

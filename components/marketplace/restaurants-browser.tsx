@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { Search, LocateFixed } from "lucide-react";
 import { Category, Restaurant } from "@/types/marketplace";
 import { RestaurantCard } from "@/components/restaurant/restaurant-card";
+import { useNearbyRestaurants } from "@/lib/use-nearby-restaurants";
 
 export function RestaurantsBrowser({
   restaurants,
@@ -14,18 +15,26 @@ export function RestaurantsBrowser({
 }) {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
+  const { restaurants: sortedByLocation, isRealLocation } = useNearbyRestaurants(restaurants);
 
   const filtered = useMemo(() => {
-    return restaurants.filter((r) => {
+    return sortedByLocation.filter((r) => {
       const matchesQuery = r.name.toLowerCase().includes(query.toLowerCase());
       const matchesCategory =
         activeCategory === "all" || r.categories.includes(activeCategory);
       return matchesQuery && matchesCategory;
     });
-  }, [restaurants, query, activeCategory]);
+  }, [sortedByLocation, query, activeCategory]);
 
   return (
     <>
+      {isRealLocation && (
+        <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-brand-600">
+          <LocateFixed size={13} />
+          Sorted by distance from your current location
+        </p>
+      )}
+
       <div className="relative mt-4 max-w-md">
         <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
         <input

@@ -7,6 +7,14 @@ export const DEFAULT_LOCATION = {
   longitude: 29.6339,
 };
 
+export interface UserLocation {
+  latitude: number;
+  longitude: number;
+  label: string;
+  /** "gps" once the browser has given us a real position, "default" otherwise. */
+  source: "gps" | "default";
+}
+
 /**
  * Haversine distance between two lat/lng points, in kilometers.
  */

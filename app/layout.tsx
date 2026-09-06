@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   },
   description:
     "Order from the best restaurants and shops around you. Fast delivery across Rwanda.",
+  icons: {
+    icon: "/favicon.png",
+    apple: "/favicon.png",
+  },
 };
 
 export default function RootLayout({

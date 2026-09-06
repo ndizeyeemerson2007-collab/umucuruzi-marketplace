@@ -7,6 +7,7 @@ import { Header } from "./header";
 import { Sidebar } from "./sidebar";
 import { CartPanel } from "./cart-panel";
 import { MobileCartBar } from "./mobile-cart-bar";
+import { Footer } from "./footer";
 
 const HIDE_CART_PANEL_ROUTES = ["/cart", "/checkout"];
 
@@ -68,6 +69,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       )}
 
       <MobileCartBar />
+      <Footer />
     </div>
   );
 }

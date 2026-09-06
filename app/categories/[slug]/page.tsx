@@ -4,8 +4,8 @@ import { getCategories, getCategoryBySlug } from "@/lib/queries/categories";
 import { getAllRestaurants, getRestaurantsByCategory } from "@/lib/queries/restaurants";
 import { getProductsByRestaurantIds } from "@/lib/queries/menu-items";
 import { CategoryNav } from "@/components/marketplace/category-nav";
-import { RestaurantCard } from "@/components/restaurant/restaurant-card";
 import { CategoryProductGrid } from "@/components/marketplace/category-product-grid";
+import { RestaurantGrid } from "@/components/marketplace/restaurant-grid";
 
 export const dynamic = "force-dynamic";
 
@@ -66,17 +66,7 @@ export default async function CategoryPage({ params }: PageProps) {
 
       <section className="px-5 sm:px-8 lg:px-10">
         <h2 className="mb-3 text-base font-bold text-brand-navy">Restaurants</h2>
-        {matchingRestaurants.length === 0 ? (
-          <p className="rounded-2xl bg-white p-6 text-center text-sm text-slate-400 shadow-card">
-            No restaurants in this category yet.
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {matchingRestaurants.map((r) => (
-              <RestaurantCard key={r.id} restaurant={r} />
-            ))}
-          </div>
-        )}
+        <RestaurantGrid restaurants={matchingRestaurants} />
       </section>
 
       {matchingProducts.length > 0 && (

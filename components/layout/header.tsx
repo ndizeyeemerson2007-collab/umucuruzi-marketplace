@@ -3,12 +3,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { MapPin, Search, ChevronDown, Heart, Bell, ShoppingCart, Menu } from "lucide-react";
+import { MapPin, Search, ChevronDown, Heart, Bell, ShoppingCart, Menu, LocateFixed } from "lucide-react";
 import { useCart } from "@/context/cart-context";
+import { useLocation } from "@/context/location-context";
 import { currentCustomer } from "@/data/customer";
 
 export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   const { itemCount } = useCart();
+  const { location, status, requestLocation } = useLocation();
   const [query, setQuery] = useState("");
 
   return (
@@ -26,8 +28,15 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
 
         {/* Logo */}
         <Link href="/" className="flex shrink-0 items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500 text-white shadow-card">
-            <ShoppingCart size={18} strokeWidth={2.5} />
+          <span className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-brand-50 shadow-card">
+            <Image
+              src="/umucuruzi-mark.png"
+              alt="UMUCURUZI"
+              fill
+              sizes="36px"
+              className="object-contain p-0.5"
+              priority
+            />
           </span>
           <span className="hidden text-xl font-bold tracking-tight text-brand-navy sm:inline">
             UMUCURUZI
@@ -37,10 +46,20 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         {/* Location selector — desktop */}
         <button
           type="button"
+          onClick={requestLocation}
+          title={
+            status === "denied"
+              ? "Location access was denied — click to try again"
+              : "Click to use your current location"
+          }
           className="hidden shrink-0 items-center gap-2 rounded-full border border-surface-border bg-white px-4 py-2.5 text-sm font-medium text-brand-navy hover:border-brand-300 md:flex"
         >
-          <MapPin size={16} className="text-brand-500" />
-          <span>Musanze, Rwanda</span>
+          {status === "loading" ? (
+            <LocateFixed size={16} className="animate-pulse text-brand-500" />
+          ) : (
+            <MapPin size={16} className="text-brand-500" />
+          )}
+          <span>{status === "loading" ? "Locating..." : location.label}</span>
           <ChevronDown size={14} className="text-slate-400" />
         </button>
 
@@ -124,8 +143,21 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         </div>
       </div>
 
-      {/* Mobile search row */}
+      {/* Mobile location + search row */}
       <div className="border-t border-surface-border px-4 py-3 md:hidden">
+        <button
+          type="button"
+          onClick={requestLocation}
+          className="mb-2 flex items-center gap-1.5 text-sm font-medium text-brand-navy"
+        >
+          {status === "loading" ? (
+            <LocateFixed size={14} className="animate-pulse text-brand-500" />
+          ) : (
+            <MapPin size={14} className="text-brand-500" />
+          )}
+          <span>{status === "loading" ? "Locating..." : location.label}</span>
+          <ChevronDown size={12} className="text-slate-400" />
+        </button>
         <div className="relative">
           <Search
             size={18}
