@@ -13,6 +13,8 @@ export interface UserLocation {
   label: string;
   /** "gps" once the browser has given us a real position, "default" otherwise. */
   source: "gps" | "default";
+  /** Epoch milliseconds when the GPS reading was captured. */
+  updatedAt?: number;
 }
 
 /**

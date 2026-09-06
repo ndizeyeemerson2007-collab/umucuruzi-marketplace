@@ -12,6 +12,7 @@ import {
 import { DEFAULT_LOCATION, UserLocation } from "@/lib/geo";
 
 const LOCATION_STORAGE_KEY = "umucuruzi:location";
+const LOCATION_CACHE_MAX_AGE_MS = 15 * 60 * 1000;
 
 export type LocationStatus = "idle" | "loading" | "granted" | "denied" | "unsupported";
 
@@ -40,11 +41,26 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const applyPosition = useCallback((position: GeolocationPosition) => {
+    const { latitude, longitude, accuracy } = position.coords;
+    if (
+      !Number.isFinite(latitude) ||
+      !Number.isFinite(longitude) ||
+      latitude < -90 ||
+      latitude > 90 ||
+      longitude < -180 ||
+      longitude > 180 ||
+      (Number.isFinite(accuracy) && accuracy > 50_000)
+    ) {
+      setStatus("denied");
+      return;
+    }
+
     const next: UserLocation = {
-      latitude: position.coords.latitude,
-      longitude: position.coords.longitude,
+      latitude,
+      longitude,
       label: "Your current location",
       source: "gps",
+      updatedAt: Date.now(),
     };
     setLocation(next);
     setStatus("granted");
@@ -69,6 +85,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
         // Permission denied, timed out, or unavailable — keep the last usable
         // location rather than interrupting the browsing flow.
         setStatus("denied");
+        stopWatching();
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
@@ -82,10 +99,20 @@ export function LocationProvider({ children }: { children: ReactNode }) {
       let hasSavedLocation = false;
       if (raw) {
         const saved = JSON.parse(raw) as UserLocation;
-        if (typeof saved.latitude === "number" && typeof saved.longitude === "number") {
+        const isFresh =
+          typeof saved.updatedAt === "number" &&
+          Date.now() - saved.updatedAt < LOCATION_CACHE_MAX_AGE_MS;
+        if (
+          saved.source === "gps" &&
+          isFresh &&
+          typeof saved.latitude === "number" &&
+          typeof saved.longitude === "number"
+        ) {
           setLocation(saved);
           setStatus("granted");
           hasSavedLocation = true;
+        } else {
+          window.localStorage.removeItem(LOCATION_STORAGE_KEY);
         }
       }
       if (!hasSavedLocation) {
@@ -93,17 +120,9 @@ export function LocationProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Refresh cached coordinates automatically only when permission was
-      // already granted. Otherwise the user can explicitly tap the location
-      // control to trigger the browser permission prompt.
-      if (navigator.permissions) {
-        navigator.permissions
-          .query({ name: "geolocation" })
-          .then((permission) => {
-            if (permission.state === "granted") requestLocation();
-          })
-          .catch(() => undefined);
-      }
+      // Always refresh a cached position. This prevents a previous browser
+      // session or a moved user from being stuck with an old location.
+      requestLocation();
     } catch {
       // ignore malformed storage and fall through to a fresh request
       requestLocation();
