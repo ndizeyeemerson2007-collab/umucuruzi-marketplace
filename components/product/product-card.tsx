@@ -1,44 +1,38 @@
 "use client";
-
 import Image from "next/image";
 import { Heart, Plus } from "lucide-react";
 import { Product } from "@/types/marketplace";
 import { useFavorites } from "@/context/favorites-context";
 import { useCart } from "@/context/cart-context";
 import { formatRwf } from "@/lib/format";
-
 export function ProductCard({
   product,
   onOpen,
-  variant = "default",
 }: {
   product: Product;
   onOpen?: (product: Product) => void;
-  variant?: "default" | "slide";
 }) {
-  const isSlide = variant === "slide";
   const { isFavoriteProduct, toggleFavoriteProduct } = useFavorites();
   const { addItem } = useCart();
   const favorite = isFavoriteProduct(product.id);
-
   return (
-    <div className={`group shrink-0 overflow-hidden rounded-2xl bg-white shadow-card transition-shadow hover:shadow-panel ${isSlide ? "border border-surface-border/80" : ""}`}>
+    <div className="group shrink-0 overflow-hidden rounded-xl bg-white shadow-card transition-shadow hover:shadow-panel">
       <button
         type="button"
         onClick={() => onOpen?.(product)}
-        className={`relative block w-full overflow-hidden text-left ${isSlide ? "h-44 sm:h-52" : "h-24 sm:h-28"}`}
+        className="relative block h-24 w-full overflow-hidden text-left sm:h-28"
       >
         <Image
           src={product.image}
           alt={product.name}
           fill
-          sizes={isSlide ? "420px" : "220px"}
+          sizes="220px"
           className={`object-cover transition-transform duration-300 group-hover:scale-105 ${
             !product.available ? "grayscale" : ""
           }`}
         />
         {product.isBestSeller && (
-          <span className={`absolute left-3 top-3 rounded-full bg-warn px-2.5 py-1 text-[11px] font-semibold text-white shadow-card ${isSlide ? "tracking-wide" : ""}`}>
+          <span className="absolute left-2.5 top-2.5 rounded-full bg-warn px-2.5 py-1 text-[11px] font-semibold text-white shadow-card">
             Bestseller
           </span>
         )}
@@ -62,18 +56,14 @@ export function ProductCard({
           <Heart size={13} className={favorite ? "fill-red-500 text-red-500" : ""} />
         </span>
       </button>
-
-      <div className={isSlide ? "p-4 sm:p-5" : "p-2.5 sm:p-3"}>
+      <div className="p-2.5 sm:p-3">
         <button type="button" onClick={() => onOpen?.(product)} className="block w-full text-left">
-          <h3 className={`${isSlide ? "text-base sm:text-lg" : "text-xs sm:text-sm"} truncate font-semibold text-brand-navy`}>
+          <h3 className="truncate text-xs font-semibold text-brand-navy sm:text-sm">
             {product.name}
           </h3>
-          {isSlide && product.description && (
-            <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-slate-500">{product.description}</p>
-          )}
         </button>
-        <div className={`${isSlide ? "mt-4" : "mt-1 sm:mt-1.5"} flex items-center justify-between`}>
-          <span className={`${isSlide ? "text-sm sm:text-base" : "text-xs sm:text-sm"} font-bold text-brand-navy`}>
+        <div className="mt-1 flex items-center justify-between sm:mt-1.5">
+          <span className="text-xs font-bold text-brand-navy sm:text-sm">
             {formatRwf(product.price)}
           </span>
           <button
@@ -86,7 +76,7 @@ export function ProductCard({
                 restaurantDeliveryFee: product.restaurantDeliveryFee ?? 0,
               })
             }
-              className={`flex items-center justify-center rounded-full bg-brand-500 text-white transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 ${isSlide ? "h-9 w-9" : "h-7 w-7 sm:h-8 sm:w-8"}`}
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-500 text-white transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 sm:h-8 sm:w-8"
             aria-label={`Add ${product.name} to cart`}
           >
             <Plus size={16} />
