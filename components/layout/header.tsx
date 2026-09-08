@@ -6,7 +6,7 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { MapPin, Search, ChevronDown, Heart, Bell, ShoppingCart, Menu, LocateFixed } from "lucide-react";
 import { useCart } from "@/context/cart-context";
 import { useLocation } from "@/context/location-context";
-import { currentCustomer } from "@/data/customer";
+import { useAuth } from "@/context/auth-context";
 
 type SearchSuggestion = {
   label: string;
@@ -175,7 +175,10 @@ function SearchField({
 export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   const { itemCount } = useCart();
   const { location, status, requestLocation } = useLocation();
+  const { user, loading: authLoading } = useAuth();
   const [query, setQuery] = useState("");
+  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Account";
+  const initials = displayName.slice(0, 1).toUpperCase();
 
   return (
     <header className="sticky top-0 z-40 border-b border-surface-border bg-white">
@@ -271,26 +274,26 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
           </Link>
 
           <Link
-            href="/profile"
+            href="/account"
             className="ml-1 hidden items-center gap-2 rounded-full py-1 pl-1 pr-3 hover:bg-surface-muted sm:flex"
           >
-            <span className="relative h-8 w-8 overflow-hidden rounded-full bg-surface-muted">
-              <Image
-                src={currentCustomer.avatar}
-                alt={currentCustomer.name}
-                fill
-                sizes="32px"
-                className="object-cover"
-              />
-            </span>
-            <span className="text-left leading-tight">
-              <span className="block text-sm font-semibold text-brand-navy">
-                {currentCustomer.name}
-              </span>
-              <span className="block text-xs text-slate-400">
-                {currentCustomer.role}
-              </span>
-            </span>
+            {authLoading ? (
+              <span className="h-8 w-8 animate-pulse rounded-full bg-surface-muted" />
+            ) : user ? (
+              <>
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-50 text-sm font-bold text-brand-600">
+                  {initials}
+                </span>
+                <span className="text-left leading-tight">
+                  <span className="block max-w-[110px] truncate text-sm font-semibold text-brand-navy">
+                    {displayName}
+                  </span>
+                  <span className="block text-xs text-slate-400">My account</span>
+                </span>
+              </>
+            ) : (
+              <span className="rounded-full bg-brand-500 px-4 py-2 text-sm font-semibold text-white">Log in</span>
+            )}
           </Link>
         </div>
       </div>

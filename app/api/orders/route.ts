@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { getUserFromRequest } from "@/lib/supabase/auth-server";
 import type { PaymentMethod } from "@/types/marketplace";
 
 export const dynamic = "force-dynamic";
@@ -35,6 +36,8 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
+
+  const authUser = await getUserFromRequest(request);
 
   let supabase;
   try {
@@ -101,12 +104,29 @@ export async function POST(request: NextRequest) {
   const deliveryFee = restaurant.delivery_fee;
   const total = subtotal + deliveryFee;
 
+  if (authUser) {
+    const { error: customerError } = await supabase.from("customers").upsert(
+      {
+        id: authUser.id,
+        name: body.customerName ?? authUser.user_metadata?.full_name ?? null,
+        email: authUser.email ?? null,
+        phone: body.customerPhone ?? authUser.phone ?? null,
+      },
+      { onConflict: "id" },
+    );
+    if (customerError) {
+      console.error("Customer account sync during order failed:", customerError.message);
+      return NextResponse.json({ error: "Could not save your customer account." }, { status: 500 });
+    }
+  }
+
   const { data: order, error: orderError } = await supabase
     .from("orders")
     .insert({
       restaurant_id: body.restaurantId,
-      customer_name: body.customerName ?? null,
-      customer_phone: body.customerPhone ?? null,
+      customer_id: authUser?.id ?? null,
+      customer_name: body.customerName ?? authUser?.user_metadata?.full_name ?? null,
+      customer_phone: body.customerPhone ?? authUser?.phone ?? null,
       status: "confirmed",
       subtotal,
       delivery_fee: deliveryFee,

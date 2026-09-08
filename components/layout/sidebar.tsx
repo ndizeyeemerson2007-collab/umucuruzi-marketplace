@@ -25,7 +25,7 @@ const NAV_ITEMS = [
   { href: "/orders", label: "Orders", icon: ClipboardList },
   { href: "/favorites", label: "Favorites", icon: Heart },
   { href: "/orders", label: "Track Order", icon: MapPinned },
-  { href: "/profile", label: "Profile", icon: User },
+  { href: "/account", label: "Account", icon: User },
 ];
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {

@@ -1,49 +1,50 @@
-import "server-only";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { mapOrder } from "@/lib/supabase/mappers";
 import type { Order } from "@/types/marketplace";
 
-// NOTE: orders/order_items intentionally have NO public RLS read policy
-// (see the row_level_security_policies migration) — order data is private.
-// These queries use the service-role admin client instead, which is safe
-// here because this file only ever runs in Server Components (never
-// shipped to the browser). Today that means "show all orders" since there
-// is no customer auth yet; once login exists, filter by the signed-in
-// customer_id here rather than opening a public RLS policy on orders.
-
-export async function getOrders(limit = 20): Promise<Order[]> {
+async function fetchOrders(customerId?: string, limit = 20): Promise<Order[]> {
   let supabase;
   try {
     supabase = createAdminSupabaseClient();
   } catch (err) {
-    console.error("getOrders: admin client unavailable —", (err as Error).message);
+    console.error("fetchOrders: admin client unavailable —", (err as Error).message);
     return [];
   }
 
-  const { data: orderRows, error } = await supabase
+  let orderQuery = supabase
     .from("orders")
     .select("*, restaurants(name)")
     .order("placed_at", { ascending: false })
     .limit(limit);
+  if (customerId) orderQuery = orderQuery.eq("customer_id", customerId);
 
+  const { data: orderRows, error } = await orderQuery;
   if (error || !orderRows) {
-    console.error("getOrders failed:", error?.message);
+    console.error("fetchOrders failed:", error?.message);
     return [];
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rows = orderRows as any[];
-  const orderIds = rows.map((o) => o.id);
+  const orderIds = rows.map((order) => order.id);
   const { data: itemRows } = await supabase
     .from("order_items")
     .select("*")
     .in("order_id", orderIds.length > 0 ? orderIds : ["00000000-0000-0000-0000-000000000000"]);
 
   return rows.map((row) => {
-    const items = (itemRows ?? []).filter((i) => i.order_id === row.id);
+    const items = (itemRows ?? []).filter((item) => item.order_id === row.id);
     const restaurantName = row.restaurants?.name as string | undefined;
     return mapOrder(row, items, restaurantName);
   });
+}
+
+export function getOrders(limit = 20) {
+  return fetchOrders(undefined, limit);
+}
+
+export function getOrdersForCustomer(customerId: string, limit = 20) {
+  return fetchOrders(customerId, limit);
 }
 
 export async function getOrderByNumber(orderNumber: string): Promise<Order | null> {
@@ -65,12 +66,7 @@ export async function getOrderByNumber(orderNumber: string): Promise<Order | nul
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const row = order as any;
-
-  const { data: items } = await supabase
-    .from("order_items")
-    .select("*")
-    .eq("order_id", row.id);
-
+  const { data: items } = await supabase.from("order_items").select("*").eq("order_id", row.id);
   const restaurantName = row.restaurants?.name as string | undefined;
   return mapOrder(row, items ?? [], restaurantName);
 }

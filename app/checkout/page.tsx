@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, MapPin, Phone, Smartphone, Banknote, Wallet } from "lucide-react";
 import { useCart } from "@/context/cart-context";
+import { useAuth } from "@/context/auth-context";
 import { formatRwf } from "@/lib/format";
 import { PaymentMethod } from "@/types/marketplace";
 
@@ -18,6 +19,7 @@ const PAYMENT_OPTIONS: { id: PaymentMethod; label: string; icon: typeof Smartpho
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, subtotal, deliveryFee, total, restaurantId, clearCart } = useCart();
+  const { user } = useAuth();
   const [location, setLocation] = useState("Musanze, Rwanda");
   const [phone, setPhone] = useState("");
   const [notes, setNotes] = useState("");
@@ -36,6 +38,7 @@ export default function CheckoutPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           restaurantId,
+          customerName: user?.user_metadata?.full_name || undefined,
           items: items.map((item) => ({
             productId: item.productId,
             quantity: item.quantity,
@@ -90,6 +93,17 @@ export default function CheckoutPage() {
           <ArrowLeft size={20} className="text-brand-navy" />
         </Link>
         <h1 className="text-xl font-bold text-brand-navy">Checkout</h1>
+      </div>
+
+      <div className="mt-4 flex items-start gap-3 rounded-2xl bg-brand-50 p-4">
+        <div className="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full bg-brand-500" />
+        <p className="text-sm leading-relaxed text-brand-navy">
+          {user ? (
+            <>You are logged in as <span className="font-semibold">{user.email}</span>. This order will be saved to your account.</>
+          ) : (
+            <>You are checking out as a guest. An account is optional, and you can still place this order normally. <Link href="/account" className="font-semibold text-brand-600 hover:underline">Log in</Link> if you want order history.</>
+          )}
+        </p>
       </div>
 
       {/* Order summary */}

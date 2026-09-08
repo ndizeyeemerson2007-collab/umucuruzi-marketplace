@@ -253,6 +253,46 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["customers"]["Insert"]>;
         Relationships: [];
       };
+      partner_applications: {
+        Row: {
+          id: string;
+          customer_id: string | null;
+          business_name: string;
+          contact_name: string;
+          email: string;
+          phone: string;
+          business_type: string;
+          location: string;
+          notes: string | null;
+          accepts_privacy_terms: boolean;
+          privacy_terms_accepted_at: string | null;
+          authorizes_pos_and_subscription: boolean;
+          pos_subscription_accepted_at: string | null;
+          status: "pending" | "reviewing" | "approved" | "rejected";
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          customer_id?: string | null;
+          business_name: string;
+          contact_name: string;
+          email: string;
+          phone: string;
+          business_type: string;
+          location: string;
+          notes?: string | null;
+          accepts_privacy_terms?: boolean;
+          privacy_terms_accepted_at?: string | null;
+          authorizes_pos_and_subscription?: boolean;
+          pos_subscription_accepted_at?: string | null;
+          status?: "pending" | "reviewing" | "approved" | "rejected";
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["partner_applications"]["Insert"]>;
+        Relationships: [];
+      };
       orders: {
         Row: {
           id: string;

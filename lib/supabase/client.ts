@@ -23,7 +23,11 @@ export function getBrowserSupabaseClient() {
   }
 
   browserClient = createClient<Database>(url, anonKey, {
-    auth: { persistSession: false },
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
   });
   return browserClient;
 }
