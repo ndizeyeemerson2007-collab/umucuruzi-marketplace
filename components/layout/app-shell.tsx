@@ -8,6 +8,7 @@ import { Sidebar } from "./sidebar";
 import { CartPanel } from "./cart-panel";
 import { MobileCartBar } from "./mobile-cart-bar";
 import { Footer } from "./footer";
+import { NavigationLoading } from "./navigation-loading";
 
 const HIDE_CART_PANEL_ROUTES = ["/cart", "/checkout"];
 
@@ -23,6 +24,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-surface-muted">
+      <NavigationLoading />
       <Header onMenuClick={() => setMobileNavOpen(true)} />
 
       <div className="mx-auto flex max-w-[1600px]">
